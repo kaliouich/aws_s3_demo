@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced AWS S3 Demo</title>
+    <style>
+        :root {
+            --primary: #FF9900; /* AWS Orange */
+            --dark: #232F3E; /* AWS Dark Blue */
+            --light: #f8f9fa;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        main {
+            flex: 1;
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 { margin: 0; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #eef2f5;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 5px solid var(--primary);
+        }
+        footer {
+            background-color: var(--dark);
+            color: #ccc;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AWS S3 Advanced Demo</h1>
+        <p>Deployed via Terraform</p>
+    </header>
+    <main>
+        <div class="card">
+            <h2>Welcome to your Static Website!</h2>
+            <p>This content is delivered directly from an <strong>Amazon S3 Bucket</strong>. The infrastructure responsible for serving this page demonstrates several powerful S3 features:</p>
+            <ul>
+                <li><strong>Static Website Hosting</strong>: Serving HTML, CSS, and JS serverlessly.</li>
+                <li><strong>Versioning</strong>: Protecting against accidental overwrites and deletions.</li>
+                <li><strong>Server-Side Encryption</strong>: Automatically encrypting object data at rest.</li>
+                <li><strong>Access Logging</strong>: Capturing all requests to a separate log bucket for audit and analysis.</li>
+                <li><strong>Lifecycle Policies</strong>: Automatically transitioning old logs to Glacier to save costs.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Infrastructure as Code</h3>
+            <p>This entire stack was provisioned using <strong>Terraform</strong>. No manual steps were taken in the AWS Console.</p>
+        </div>
+    </main>
+    <footer>
+        <p>AWS Terraform Learning Journey &copy; 2025</p>
+    </footer>
+</body>
+</html>

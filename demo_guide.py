@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+import json
+import subprocess
+import sys
+import os
+
+# Colors for pretty printing
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def print_header(text):
+    print(f"\n{Colors.HEADER}{Colors.BOLD}=== {text} ==={Colors.ENDC}")
+
+def print_step(number, title, description):
+    print(f"\n{Colors.BLUE}{Colors.BOLD}Step {number}: {title}{Colors.ENDC}")
+    print(f"{description}")
+
+def print_command(command):
+    print(f"\n{Colors.GREEN}$ {command}{Colors.ENDC}")
+
+def get_terraform_outputs():
+    try:
+        # Check if terraform is installed
+        subprocess.check_call(["terraform", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        print("Reading Terraform outputs...")
+        result = subprocess.check_output(["terraform", "output", "-json"], encoding='utf-8')
+        return json.loads(result)
+    except FileNotFoundError:
+        print(f"{Colors.FAIL}Error: 'terraform' executable not found in PATH.{Colors.ENDC}")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print(f"{Colors.FAIL}Error: Failed to run terraform output.{Colors.ENDC}")
+        print("Make sure you have run 'terraform apply' first.")
+        sys.exit(1)
+
+def main():
+    print(f"{Colors.BOLD}AWS S3 Advanced Demo - Presenter Guide{Colors.ENDC}")
+    print("------------------------------------------")
+
+    outputs = get_terraform_outputs()
+    
+    # Extract values safely
+    website_url = outputs.get('website_endpoint', {}).get('value', 'N/A')
+    presign_cmd = outputs.get('s3_presign_command', {}).get('value', 'N/A')
+    direct_url = outputs.get('secret_file_direct_url', {}).get('value', 'N/A')
+    auditor_cmd = outputs.get('auditor_access_command', {}).get('value', 'N/A')
+    auditor_arn = outputs.get('auditor_access_point_arn', {}).get('value', 'N/A')
+    
+    # Step 1: Website
+    print_step(1, "Static Website Hosting", "Show the public website running securely on S3.")
+    print(f"Open this URL in your browser:\n{Colors.UNDERLINE}{website_url}{Colors.ENDC}")
+    input(f"\nPress {Colors.BOLD}Enter{Colors.ENDC} to continue to the next step...")
+
+    # Step 2: Pre-signed URL
+    print_step(2, "Pre-signed URL (Security Demo)", "Demonstrate that private files are inaccessible, then generate a temporary link.")
+    print("1. Try to open this Direct Link (Should fail/403):")
+    print(f"   {Colors.FAIL}{direct_url}{Colors.ENDC}")
+    
+    print("\n2. Generate a Pre-signed URL by running this command:")
+    print_command(presign_cmd)
+    print("   (Copy and paste the output URL into your browser)")
+    input(f"\nPress {Colors.BOLD}Enter{Colors.ENDC} to continue...")
+
+    # Step 3: Access Points
+    print_step(3, "S3 Access Points (Auditor)", "Show how specific endpoints can have restricted views.")
+    print("1. List logs using the Auditor Access Point (Should succeed):")
+    print_command(auditor_cmd)
+    
+    print("\n2. Try to steal the secret using the Auditor Access Point (Should Access Denied):")
+    # Construct the steal command
+    steal_cmd = f"aws s3 cp s3://{auditor_arn}/secret.txt -"
+    print_command(steal_cmd)
+    
+    print_header("Demo Complete")
+    print("Remember to run 'terraform destroy' when finished.")
+
+if __name__ == "__main__":
+    main()
