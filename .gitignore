@@ -29,3 +29,8 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# Generated Demo Artifacts
+outputs.json
+dummy.txt
+dummy_log.txt

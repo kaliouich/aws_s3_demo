@@ -1,1 +1,0 @@
-79a5 s3-demo [05/Jan/2026:12:00:00] 1.2.3.4 - 12345 REST.GET.OBJECT index.html "GET /index.html HTTP/1.1" 200 - 1024 10 10 "-" "Mozilla/5.0"
