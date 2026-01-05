@@ -1,0 +1,20 @@
+{
+  "website_endpoint": {
+    "value": "http://s3-demo-journey-38483287.s3-website-us-east-1.amazonaws.com"
+  },
+  "log_bucket_name": {
+    "value": "s3-demo-journey-logs-38483287"
+  },
+  "secret_file_direct_url": {
+    "value": "https://s3-demo-journey-logs-38483287.s3.amazonaws.com/secret.txt"
+  },
+  "s3_presign_command": {
+    "value": "aws s3 presign s3://s3-demo-journey-logs-38483287/secret.txt --expires-in 300"
+  },
+  "auditor_access_point_arn": {
+    "value": "arn:aws:s3:us-east-1:012584563464:accesspoint/s3-demo-journey-auditor-38483287"
+  },
+  "auditor_access_command": {
+    "value": "aws s3 ls s3://arn:aws:s3:us-east-1:012584563464:accesspoint/s3-demo-journey-auditor-38483287/log/"
+  }
+}

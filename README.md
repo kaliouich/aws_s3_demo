@@ -1,95 +1,62 @@
-# AWS S3 Terraform Demo
+# AWS S3 Advanced Demo (CLI Edition)
 
-**Part of the AWS Terraform Learning Journey**
+This project demonstrates advanced AWS S3 features including **Static Website Hosting**, **Lifecycle Policies**, **Pre-signed URLs**, and **S3 Access Points** with restricted policies.
 
-This project demonstrates an advanced setup of Amazon S3 using Terraform. It deploys a secure, static website with automated logging, versioning, and lifecycle management.
-
-## Architecture Highlights
-
-1.  **Static Website Hosting**:
-    - Hosted on S3 with a public read policy.
-    - Custom `index.html` and `error.html` pages.
-    - **Versioning**: Enabled to keep history of changes and prevent accidental deletions.
-    - **Encryption**: Server-Side Encryption (SSE-S3) enabled by default.
-
-2.  **Access Logging**:
-    - A separate S3 bucket is created to store access logs from the website bucket.
-    - Logs are stored in a `log/` prefix.
-
-3.  **Lifecycle Management (Cost Optimization)**:
-    - **Transition**: Logs older than **30 days** are moved to **GLACIER** storage class.
-    - **Expiration**: Logs older than **90 days** are permanently deleted.
-
-4.  **Pre-signed URL Demo**:
-    -   A `secret.txt` file is uploaded to the **private** Log Bucket.
-    -   Demonstrates secure, temporary access sharing without making the bucket public.
-
-5.  **S3 Access Point ("Auditor")**:
-    -   A specific entry point for the Log Bucket.
-    -   Policy restricted to **only** allow access to `log/*` objects.
-    -   Demonstrates how to provide granular access control for specific use cases (e.g., Auditing) without modifying the main bucket policy.
+> **Note**: This project was originally designed for Terraform, but due to Lab Environment restrictions (Service Control Policies blocking `s3:GetAccelerateConfiguration`), it has been converted to use the **AWS CLI** directly. The legacy Terraform code can be found in `terraform_legacy/`.
 
 ## Project Structure
 
-```
-aws_s3_demo/
-├── main.tf        # Main Terraform configuration (Resources)
-├── variables.tf   # Configuration variables
-├── outputs.tf     # Output definitions (Website URL)
-├── README.md      # This documentation
-└── www/
-    ├── index.html # Website entry point
-    └── error.html # 404 Error page
-```
+-   `deploy.sh`: Primary deployment script (Bash + AWS CLI).
+-   `fix_policy.sh`: Script to enforce strict "Explicit Deny" policies on the Access Point.
+-   `demo_guide.py`: Interactive Python script to guide the presenter.
+-   `www/`: Static website content (`index.html`, `error.html`, `secret.txt`).
+-   `terraform_legacy/`: Archive of the original Terraform implementation.
+
+## Features Application
+
+1.  **Static Website**: A public bucket hosting a simple HTML site.
+2.  **Log Bucket**: A private bucket receiving server access logs from the website.
+3.  **Lifecycle Rules**: Logs are transitioned to GLACIER after 30 days and expired after 90 days.
+4.  **Granular Access**:
+    -   **Pre-signed URLs**: Temporary access to private files (`secret.txt`).
+    -   **S3 Access Points**: A specific endpoint restricted to only view logs, blocking access to other private files.
 
 ## Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads) installed (v1.0+).
-- AWS Credentials configured (e.g., via `aws configure` or environment variables).
+-   **AWS CLI** (v2 recommended)
+-   **Python 3**
+-   Active AWS credentials
 
-## Deployment
+## Usage
 
-1.  **Initialize Terraform**:
-    Downloads necessary providers.
-    ```bash
-    terraform init
-    ```
+### 1. Deploy the Infrastructure
+Run the deployment script to create buckets, upload files, and configure policies.
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
 
-2.  **Plan the Deployment**:
-    Preview the changes Terraform will make.
-    ```bash
-    terraform plan
-    ```
+### 2. Run the Demo Guide
+Use the Python script to walk through the features interactively.
+```bash
+python3 demo_guide.py
+```
 
-3.  **Apply Changes**:
-    Provision the infrastructure.
-    ```bash
-    terraform apply
-    ```
-    *Type `yes` when prompted.*
-
-4.  **Run the Demo Guide**:
-    For a guided experience, run the included Python script:
-    ```bash
-    python3 demo_guide.py
-    ```
-    This script will read the Terraform outputs and walk you through the following steps interactively.
-
-5.  **Manual Verification**:
-    If you prefer to verify manually:
-    -   **Access the Website**: Open the `website_endpoint` URL.
-    -   **Test Pre-signed URLs**:
-        -   Try the `secret_file_direct_url` (Expect 403).
-        -   Run `s3_presign_command` and visit the generated URL.
-    -   **Test Access Points**:
-        -   Run `auditor_access_command`.
-        -   Try accessing the secret file via the Access Point (Expect Access Denied).
-
-## Clean Up
-
-To destroy all resources and stop incurring costs:
+### 3. Demonstrate Security (Access Points)
+During the demo, you will see that the "Auditor" Access Point might initially allow too much access (if you are an Admin).
+To demonstrate **strict** security, apply the "Explicit Deny" policy:
 
 ```bash
-terraform destroy
+chmod +x fix_policy.sh
+./fix_policy.sh
 ```
-*Note: The buckets are configured with `force_destroy = true`, so they will be deleted even if they contain objects.*
+*Now retry the "steal secret" step in the demo—it will be denied.*
+
+## Cleanup
+To remove all resources created by the script, you will need to manually delete the buckets and access points via the AWS Console or CLI.
+```bash
+# Example Cleanup (Replace with your actual bucket names)
+aws s3 rb s3://<website-bucket-name> --force
+aws s3 rb s3://<log-bucket-name> --force
+aws s3control delete-access-point --name <access-point-name> --account-id <your-account-id>
+```
