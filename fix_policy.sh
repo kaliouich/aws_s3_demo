@@ -1,10 +1,21 @@
 #!/bin/bash
 set -e
 
-# Configuration derived from your specific deployment
-AP_ARN="arn:aws:s3:us-east-1:012584563464:accesspoint/s3-demo-journey-auditor-38483287"
-AP_NAME="s3-demo-journey-auditor-38483287"
-ACCOUNT_ID="012584563464"
+# Configuration dynamically loaded from outputs.json
+if [ ! -f "outputs.json" ]; then
+    echo "Error: outputs.json not found. Run ./deploy.sh first."
+    exit 1
+fi
+
+# Extract values using Python (reliable strings handling)
+AP_ARN=$(python3 -c "import json; print(json.load(open('outputs.json'))['auditor_access_point_arn']['value'])")
+AP_NAME=$(echo $AP_ARN | rev | cut -d'/' -f1 | rev)
+ACCOUNT_ID=$(echo $AP_ARN | cut -d':' -f5)
+
+echo "Detected Configuration:"
+echo "  AP_ARN:     $AP_ARN"
+echo "  AP_NAME:    $AP_NAME"
+echo "  ACCOUNT_ID: $ACCOUNT_ID"
 
 # Find AWS CLI
 if command -v aws &> /dev/null; then

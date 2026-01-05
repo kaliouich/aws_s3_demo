@@ -32,21 +32,11 @@ def get_terraform_outputs():
         with open("outputs.json", "r") as f:
             return json.load(f)
 
-    # Priority 2: Try Terraform
-    try:
-        # Check if terraform is installed
-        subprocess.check_call(["terraform", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
-        print("Reading Terraform outputs...")
-        result = subprocess.check_output(["terraform", "output", "-json"], encoding='utf-8')
-        return json.loads(result)
-    except FileNotFoundError:
-        print(f"{Colors.FAIL}Error: 'terraform' executable not found in PATH.{Colors.ENDC}")
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"{Colors.FAIL}Error: Failed to run terraform output.{Colors.ENDC}")
-        print("Make sure you have run 'terraform apply' first.")
-        sys.exit(1)
+    # If missing, instruct user to run deploy script
+    print(f"{Colors.FAIL}Error: 'outputs.json' not found.{Colors.ENDC}")
+    print("Please run the deployment script first to generate this file:")
+    print(f"{Colors.GREEN}./deploy.sh{Colors.ENDC}")
+    sys.exit(1)
 
 def main():
     print(f"{Colors.BOLD}AWS S3 Advanced Demo - Presenter Guide{Colors.ENDC}")
@@ -89,6 +79,14 @@ def main():
     # Construct the steal command
     steal_cmd = f"aws s3 cp s3://{auditor_arn}/secret.txt -"
     print_command(steal_cmd)
+
+    print(f"\n   {Colors.WARNING}Note:{Colors.ENDC} If this SUCCEEDS (because you are Admin), run this script to enforce strict security:")
+    print(f"   {Colors.GREEN}./fix_policy.sh{Colors.ENDC}")
+    print("   Then try the steal command again - it will be DENIED.")
+
+    print("\n3. Verify that the Pre-signed URL from Step 2 STILL works:")
+    print("   (Access Point policies do not affect direct bucket access/pre-signed URLs)")
+    print(f"   {Colors.GREEN}Go back to your browser and refresh the pre-signed link.{Colors.ENDC}")
     
     print_header("Demo Complete")
     print("To clean up, you must manually delete the buckets and access point:")

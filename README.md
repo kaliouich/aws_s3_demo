@@ -67,6 +67,8 @@ The script guides you through 3 main features. Here is what to expect:
 - **Action 2**: The script tries to "steal" the secret using the same Access Point.
     - *Initially*: This may **Succeed** if you are an Admin.
     - *After Security Fix*: Once you run `fix_policy.sh`, this action will fail with **Access Denied**.
+- **Action 3**: Retry the **Pre-signed URL** from Step 2.
+- **Expected Outcome**: **Success**. This proves that restricting the Access Point does *not* break other valid access methods (like pre-signed URLs) to the underlying bucket.
 
 ### 3. Demonstrate Security (Access Points)
 During the demo, you will see that the "Auditor" Access Point might initially allow too much access (if you are an Admin).
