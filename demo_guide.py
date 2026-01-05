@@ -81,13 +81,20 @@ def main():
     print("1. List logs using the Auditor Access Point (Should succeed):")
     print_command(auditor_cmd)
     
+    # Add simulation tip
+    print(f"\n   {Colors.WARNING}Note:{Colors.ENDC} If the log list is empty (logs take time to deliver), run this to simulate data:")
+    print(f"   {Colors.GREEN}echo 'Simulated Log' > dummy.txt && aws s3 cp dummy.txt s3://{outputs['log_bucket_name']['value']}/log/sim-log.txt{Colors.ENDC}")
+    
     print("\n2. Try to steal the secret using the Auditor Access Point (Should Access Denied):")
     # Construct the steal command
     steal_cmd = f"aws s3 cp s3://{auditor_arn}/secret.txt -"
     print_command(steal_cmd)
     
     print_header("Demo Complete")
-    print("Remember to run 'terraform destroy' when finished.")
+    print("To clean up, you must manually delete the buckets and access point:")
+    print(f"1. aws s3 rb s3://{outputs['website_endpoint']['value'].split('http://')[1].split('.s3')[0]} --force")
+    print(f"2. aws s3 rb s3://{outputs['log_bucket_name']['value']} --force")
+    print(f"3. aws s3control delete-access-point --name {auditor_arn.split('/')[-1]} --account-id {auditor_arn.split(':')[4]}")
 
 if __name__ == "__main__":
     main()

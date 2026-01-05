@@ -2,7 +2,7 @@
 
 This project demonstrates advanced AWS S3 features including **Static Website Hosting**, **Lifecycle Policies**, **Pre-signed URLs**, and **S3 Access Points** with restricted policies.
 
-> **Note**: This project was originally designed for Terraform, but due to Lab Environment restrictions (Service Control Policies blocking `s3:GetAccelerateConfiguration`), it has been converted to use the **AWS CLI** directly. The legacy Terraform code can be found in `terraform_legacy/`.
+> **Note**: This project was originally designed for Terraform, but due to Lab Environment restrictions (Service Control Policies blocking `s3:GetAccelerateConfiguration`), it has been converted to use the **AWS CLI** directly.
 
 ## Project Structure
 
@@ -10,7 +10,6 @@ This project demonstrates advanced AWS S3 features including **Static Website Ho
 -   `fix_policy.sh`: Script to enforce strict "Explicit Deny" policies on the Access Point.
 -   `demo_guide.py`: Interactive Python script to guide the presenter.
 -   `www/`: Static website content (`index.html`, `error.html`, `secret.txt`).
--   `terraform_legacy/`: Archive of the original Terraform implementation.
 
 ## Features Application
 
@@ -38,9 +37,36 @@ chmod +x deploy.sh
 
 ### 2. Run the Demo Guide
 Use the Python script to walk through the features interactively.
+
 ```bash
 python3 demo_guide.py
 ```
+
+### Demo Guide: Step-by-Step Explanation
+
+The script guides you through 3 main features. Here is what to expect:
+
+**Step 1: Static Website Hosting**
+- **Action**: The script provides a URL (e.g., `http://...s3-website...`).
+- **Expected Outcome**: Opening this link shows the "Welcome" HTML page. This confirms the bucket is public and correctly hosting the static site.
+
+**Step 2: Pre-signed URL (Security)**
+- **Action 1**: The script provides a Direct Link to `secret.txt`.
+- **Expected Outcome**: **403 Forbidden**. The file is in a private bucket, so direct access is blocked.
+- **Action 2**: The script generates a long Pre-signed URL.
+- **Expected Outcome**: **Success**. Opening this temporary link allows you to view the secret file, demonstrating secure, temporary access sharing.
+
+**Step 3: S3 Access Points (Granular Control)**
+- **Action 1**: The script lists logs using the "Auditor" Access Point.
+- **Expected Outcome**: **Success**. The policy allows viewing logs.
+    > **Note**: Real S3 access logs take 15-60 minutes to appear. To see data immediately during a demo, you can "simulate" a log file:
+    > ```bash
+    > echo "Simulated Log Entry" > dummy.txt
+    > aws s3 cp dummy.txt s3://s3-demo-journey-logs-38483287/log/simulated-log.txt
+    > ```
+- **Action 2**: The script tries to "steal" the secret using the same Access Point.
+    - *Initially*: This may **Succeed** if you are an Admin.
+    - *After Security Fix*: Once you run `fix_policy.sh`, this action will fail with **Access Denied**.
 
 ### 3. Demonstrate Security (Access Points)
 During the demo, you will see that the "Auditor" Access Point might initially allow too much access (if you are an Admin).
